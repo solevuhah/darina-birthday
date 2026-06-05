@@ -1,18 +1,12 @@
 const photo = 'media/photo.jpg';
 const video = 'media/video.mp4';
 
-function toggleSound() {
-    const video = document.getElementById('bgVideo');
-    const btn = document.getElementById('soundBtn');
-    
-    if (video.muted) {
-        video.muted = false;
-        btn.textContent = '🔇 Выключить звук';
-    } else {
-        video.muted = true;
-        btn.textContent = '🔊 Включить звук';
-    }
-}
+// Включаем звук при первом клике
+document.addEventListener('click', function() {
+    const bgVideo = document.getElementById('bgVideo');
+    bgVideo.muted = false;
+    bgVideo.play();
+}, { once: true });
 
 function openGift() {
     document.getElementById('giftModal').classList.remove('hidden');

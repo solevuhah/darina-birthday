@@ -1,15 +1,223 @@
-<!DOCTYPE html>
+
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>С Днём Рождения, Дарина! 🎂</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Общие стили и сброс параметров */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Задний фон: видео на весь экран */
+        .bg-video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -2;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        /* Затемнение поверх видео для читаемости текста */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: -1;
+        }
+
+        /* Основной контейнер */
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 20px;
+            max-width: 600px;
+            width: 90%;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.8), 0 0 30px rgba(255, 20, 147, 0.5);
+            color: #fff;
+            font-weight: 800;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #ff99c8;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Кнопка подарка */
+        .gift-btn {
+            background: linear-gradient(45deg, #ff007f, #ff5e62);
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .gift-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 35px rgba(255, 0, 127, 0.9);
+        }
+
+        .gift-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Модальные окна (Стеклянный эффект) */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.hidden {
+            display: none;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-box h2 {
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            color: #fff;
+        }
+
+        .modal-box button {
+            display: block;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 14px;
+            margin: 12px 0;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .modal-box button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Кнопка закрытия */
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #fff;
+        }
+
+        /* Окно для просмотра медиа */
+        #mediaModal {
+            flex-direction: column;
+        }
+
+        #mediaContent {
+            max-width: 90%;
+            max-height: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #mediaContent img, #mediaContent video {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <video class="bg-video" autoplay loop playsinline>
+
+    <!-- Фоновое видео (изначально muted для обхода блокировок браузера) -->
+    <video id="bgVideo" class="bg-video" autoplay loop playsinline muted>
         <source src="media/background.mp4" type="video/mp4">
+        <!-- Резервный цвет фона, если файл видео не будет найден -->
     </video>
+    
     <div class="overlay"></div>
     
     <div class="container">
@@ -18,6 +226,7 @@
         
         <button class="gift-btn" onclick="openGift()">🎁 Получить подарок</button>
         
+        <!-- Модалка выбора подарка -->
         <div class="modal hidden" id="giftModal">
             <div class="modal-box">
                 <span class="close" onclick="closeGift()">✕</span>
@@ -27,12 +236,84 @@
             </div>
         </div>
         
+        <!-- Модалка показа фото/видео -->
         <div class="modal hidden" id="mediaModal">
             <span class="close" onclick="closeMedia()">✕</span>
             <div id="mediaContent"></div>
         </div>
     </div>
     
-    <script src="script.js"></script>
+    <script>
+        const bgVideo = document.getElementById('bgVideo');
+
+        // Функция автоматического включения звука при ЛЮБОМ клике/взаимодействии с сайтом
+        function enableSound() {
+            if (bgVideo) {
+                bgVideo.muted = false; // Снимаем беззвучный режим
+                // На случай, если видео стояло на паузе из-за блокировки автоплея:
+                bgVideo.play().catch(err => {
+                    console.log("Автовоспроизведение ожидает клика:", err);
+                });
+            }
+            // Удаляем слушатели, так как звук мы уже включили
+            document.removeEventListener('click', enableSound);
+            document.removeEventListener('touchstart', enableSound);
+        }
+
+        // Добавляем отслеживание первого касания/клика по сайту для включения звука
+        document.addEventListener('click', enableSound);
+        document.addEventListener('touchstart', enableSound);
+
+        // Открытие первой модалки подарка
+        function openGift() {
+            // Включаем звук принудительно при клике на эту кнопку
+            enableSound(); 
+            
+            const giftModal = document.getElementById('giftModal');
+            giftModal.classList.remove('hidden');
+        }
+        
+        // Закрытие модалки подарка
+        function closeGift() {
+            document.getElementById('giftModal').classList.add('hidden');
+        }
+        
+        // Открытие медиа (Фото / Видео)
+        function openMedia(type) {
+            const mediaModal = document.getElementById('mediaModal');
+            const mediaContent = document.getElementById('mediaContent');
+            
+            // Очищаем предыдущий контент
+            mediaContent.innerHTML = '';
+            
+            if (type === 'photo') {
+                // Путь к твоему фото (измени на свой реальный путь при необходимости)
+                mediaContent.innerHTML = `<img src="media/gift-photo.jpg" alt="Подарок Дарине" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1549417229-aa67d3263c09?w=800';">`;
+            } else if (type === 'video') {
+                // Путь к твоему поздравительному видео (измени на свой реальный путь)
+                // Здесь звук ВКЛЮЧЕН (нет атрибута muted) и добавлен автоплей
+                mediaContent.innerHTML = `
+                    <video autoplay controls playsinline style="width:100%;">
+                        <source src="media/gift-video.mp4" type="video/mp4">
+                        Ваш браузер не поддерживает видео.
+                    </video>
+                `;
+            }
+            
+            // Скрываем первую модалку и показываем медиа модалку
+            closeGift();
+            mediaModal.classList.remove('hidden');
+        }
+        
+        // Закрытие медиа модалки
+        function closeMedia() {
+            const mediaModal = document.getElementById('mediaModal');
+            const mediaContent = document.getElementById('mediaContent');
+            
+            // Останавливаем видео внутри модалки перед закрытием, чтобы оно не пело на фоне
+            mediaContent.innerHTML = ''; 
+            mediaModal.classList.add('hidden');
+        }
+    </script>
 </body>
 </html>

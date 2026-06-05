@@ -1,88 +1,76 @@
-// Замени пути на свои файлы
-const surprises = {
-    photo: [
-        'media/photo1.jpg',
-        'media/photo2.jpg',
-        // добавь больше фото
-    ],
-    gif: [
-        'media/gif1.gif',
-        'media/gif2.gif',
-        // добавь больше гифок
-    ],
-    video: [
-        'media/video1.mp4',
-        // добавь больше видео
-    ]
-};
+// Фото (добавь свои пути)
+const photos = [
+    'media/photo1.jpg',
+    'media/photo2.jpg',
+    'media/photo3.jpg',
+    'media/photo4.jpg'
+];
 
-function getRandomItem(array) {
-    return array[Math.floor(Math.random() * array.length)];
+// Видео (добавь свои пути)
+const videos = [
+    'media/video1.mp4',
+    'media/video2.mp4'
+];
+
+function openGift() {
+    document.getElementById('giftBox').classList.remove('hidden');
 }
 
-function showSurprise(type) {
-    const container = document.getElementById('surprise-container');
-    const content = document.getElementById('surprise-content');
+function closeGift() {
+    document.getElementById('giftBox').classList.add('hidden');
+}
+
+function openMedia(type) {
+    const viewer = document.getElementById('mediaViewer');
+    const content = document.getElementById('mediaContent');
     
-    let mediaUrl;
-    
-    if (type === 'random') {
-        // Выбираем случайный тип
-        const types = Object.keys(surprises);
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        mediaUrl = getRandomItem(surprises[randomType]);
-        type = randomType;
-    } else {
-        mediaUrl = getRandomItem(surprises[type]);
-    }
-    
-    // Очищаем предыдущий контент
     content.innerHTML = '';
     
-    // Создаем элемент в зависимости от типа
-    if (type === 'video') {
-        const video = document.createElement('video');
-        video.src = mediaUrl;
-        video.controls = true;
-        video.autoplay = true;
-        video.style.maxWidth = '100%';
-        video.style.maxHeight = '90vh';
-        content.appendChild(video);
-    } else {
-        const img = document.createElement('img');
-        img.src = mediaUrl;
-        img.alt = 'Сюрприз!';
-        content.appendChild(img);
+    if (type === 'photo') {
+        photos.forEach(photo => {
+            const img = document.createElement('img');
+            img.src = photo;
+            img.alt = 'Фото с Дариной';
+            img.loading = 'lazy';
+            content.appendChild(img);
+        });
+    } else if (type === 'video') {
+        videos.forEach(video => {
+            const videoEl = document.createElement('video');
+            videoEl.src = video;
+            videoEl.controls = true;
+            content.appendChild(videoEl);
+        });
     }
     
-    // Показываем контейнер
-    container.classList.remove('hidden');
+    viewer.classList.remove('hidden');
+    closeGift();
 }
 
-function closeSurprise() {
-    const container = document.getElementById('surprise-container');
-    const content = document.getElementById('surprise-content');
+function closeMedia() {
+    const viewer = document.getElementById('mediaViewer');
+    const content = document.getElementById('mediaContent');
     
-    // Останавливаем видео если есть
-    const video = content.querySelector('video');
-    if (video) {
-        video.pause();
-    }
+    const videos = content.querySelectorAll('video');
+    videos.forEach(v => v.pause());
     
-    container.classList.add('hidden');
+    viewer.classList.add('hidden');
     content.innerHTML = '';
 }
-
-// Закрытие по клику на фон
-document.getElementById('surprise-container').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeSurprise();
-    }
-});
 
 // Закрытие по клавише Escape
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        closeSurprise();
+        closeGift();
+        closeMedia();
     }
+});
+
+// Закрытие по клику на фон
+document.getElementById('giftBox').addEventListener('click', function(e) {
+    if (e.target === this) closeGift();
+});
+
+document.getElementById('mediaViewer').addEventListener('click', function(e) {
+    if (e.target === this) closeMedia();
 });

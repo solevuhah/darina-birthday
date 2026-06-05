@@ -7,10 +7,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <video class="bg-video" autoplay loop playsinline>
+    <video class="bg-video" autoplay muted loop playsinline id="bgVideo">
         <source src="media/background.mp4" type="video/mp4">
     </video>
     <div class="overlay"></div>
+    
+    <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊 Включить звук</button>
     
     <div class="container">
         <h1>С Днём Рождения, Дарина! 🎂</h1>

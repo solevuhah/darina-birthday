@@ -7,37 +7,30 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Видео фон -->
-    <video class="bg-video" autoplay muted loop playsinline id="bgVideo">
+    <video class="bg-video" autoplay muted loop playsinline>
         <source src="media/background.mp4" type="video/mp4">
     </video>
-    
     <div class="overlay"></div>
     
     <div class="container">
-        <h1 class="title">С Днём Рождения, Дарина! 🎂</h1>
-        <p class="subtitle">Ты самая лучшая! 💕</p>
+        <h1>С Днём Рождения, Дарина! 🎂</h1>
+        <p>Ты самая лучшая! 💕</p>
         
-        <!-- Одна кнопка -->
-        <button class="gift-btn" id="giftBtn" onclick="showButtons()">
-            🎁 Получить подарок
-        </button>
+        <button class="gift-btn" onclick="openGift()">🎁 Получить подарок</button>
         
-        <!-- Две кнопки (скрыты) -->
-        <div class="buttons-group hidden" id="buttonsGroup">
-            <button class="photo-btn" onclick="openMedia('photo')">
-                📸 Фото
-            </button>
-            <button class="video-btn" onclick="openMedia('video')">
-                🎥 Видео
-            </button>
+        <div class="modal hidden" id="giftModal">
+            <div class="modal-box">
+                <span class="close" onclick="closeGift()">✕</span>
+                <h2>Выбери подарок 🎉</h2>
+                <button onclick="openMedia('photo')">📸 Фото</button>
+                <button onclick="openMedia('video')">🎥 Видео</button>
+            </div>
         </div>
-    </div>
-    
-    <!-- Просмотр медиа -->
-    <div class="media-viewer hidden" id="mediaViewer">
-        <span class="close-btn" onclick="closeMedia()">✕</span>
-        <div class="media-content" id="mediaContent"></div>
+        
+        <div class="modal hidden" id="mediaModal">
+            <span class="close" onclick="closeMedia()">✕</span>
+            <div id="mediaContent"></div>
+        </div>
     </div>
     
     <script src="script.js"></script>

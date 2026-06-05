@@ -29,12 +29,12 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             z-index: -2;
             object-fit: cover;
             opacity: 1;
-            background-color: #000; /* Резервный фон */
+            background-color: #000; /* Временный черный фон до загрузки */
         }
 
         /* Затемнение поверх видео для читаемости текста */
@@ -211,10 +211,8 @@
 </head>
 <body>
 
-    <!-- Фоновое видео (путь прописан напрямую в src для гарантированного обхода блокировок) -->
+    <!-- Фоновое видео (изначально muted, чтобы браузер ГАРАНТИРОВАННО разрешил его показ сзади кнопок) -->
     <video id="bgVideo" class="bg-video" autoplay loop playsinline muted preload="auto" src="media/background.mp4">
-        <!-- Резервный вариант для старых браузеров -->
-        <source src="media/background.mp4" type="video/mp4">
     </video>
     
     <div class="overlay"></div>
@@ -245,38 +243,50 @@
     <script>
         const bgVideo = document.getElementById('bgVideo');
 
-        // Принудительно заставляем браузер подгрузить и запустить видео при загрузке страницы
-        function initBackgroundVideo() {
+        // Умный обработчик ошибок путей для фонового видео
+        if (bgVideo) {
+            bgVideo.addEventListener('error', function() {
+                const currentSrc = bgVideo.getAttribute('src');
+                if (currentSrc && currentSrc.includes('media/')) {
+                    console.log("Видео не найдено в папе media/. Пробуем корень...");
+                    bgVideo.src = 'background.mp4';
+                    bgVideo.load();
+                    bgVideo.play().catch(err => console.log("Ошибка воспроизведения из корня:", err));
+                }
+            }, true);
+        }
+
+        // Принудительно запускаем воспроизведение видео (в беззвучном режиме для обхода блокировок)
+        function forcePlayBackground() {
             if (bgVideo) {
-                bgVideo.muted = true; // Сначала беззвучно (требование безопасности браузера)
-                bgVideo.load();       // Принудительно перезагружаем источник
+                bgVideo.muted = true; 
                 bgVideo.play().catch(err => {
-                    console.log("Автоплей ожидает первого клика пользователя:", err);
+                    console.log("Браузер заблокировал автоплей. Ждем действия пользователя.");
                 });
             }
         }
 
-        // Запуск инициализации при первой возможности
-        document.addEventListener('DOMContentLoaded', initBackgroundVideo);
-        window.addEventListener('load', initBackgroundVideo);
+        // Запуск при загрузке документа
+        document.addEventListener('DOMContentLoaded', forcePlayBackground);
+        window.addEventListener('load', forcePlayBackground);
 
-        // Функция включения звука фонового видео при взаимодействии
+        // Функция включения звука при первом клике пользователя
         function enableSound() {
             if (bgVideo) {
-                bgVideo.muted = false; // Включаем звук
-                bgVideo.play().catch(err => console.log("Не удалось запустить видео со звуком:", err));
+                bgVideo.muted = false; // Включаем звук фонового видео
+                bgVideo.play().catch(err => console.log("Не удалось включить звук:", err));
             }
-            // Снимаем глобальные прослушиватели событий, чтобы не срабатывали повторно
+            // Удаляем отслеживание клика, звук уже включен
             document.removeEventListener('click', enableSound);
             document.removeEventListener('touchstart', enableSound);
         }
 
-        // Слушаем первый клик или касание экрана для активации звука
+        // Вешаем прослушиватели клика/касания для включения звука
         document.addEventListener('click', enableSound);
         document.addEventListener('touchstart', enableSound);
 
         function openGift() {
-            enableSound(); // Принудительно включаем звук фонового видео на клик
+            enableSound(); // Гарантируем включение звука фона при клике на кнопку подарка
             document.getElementById('giftModal').classList.remove('hidden');
         }
         
@@ -290,29 +300,58 @@
             mediaContent.innerHTML = '';
             
             if (type === 'photo') {
-                mediaContent.innerHTML = `<img src="media/photo.jpg" alt="Подарок Дарине" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1549417229-aa67d3263c09?w=800';">`;
+                mediaContent.innerHTML = `<img id="giftImg" src="media/photo.jpg" alt="Подарок Дарине">`;
+                
+                const img = document.getElementById('giftImg');
+                img.onerror = function() {
+                    if (img.src.includes('media/')) {
+                        console.log("Фото не найдено в media/. Пробуем корень...");
+                        img.src = 'photo.jpg';
+                    } else {
+                        // Резервная заглушка, если вообще файла нет
+                        img.src = 'https://images.unsplash.com/photo-1549417229-aa67d3263c09?w=800';
+                    }
+                };
+
             } else if (type === 'video') {
                 mediaContent.innerHTML = `
-                    <video id="giftVideo" autoplay controls playsinline style="width:100%;">
-                        <source src="media/video.mp4" type="video/mp4">
+                    <video id="giftVideo" autoplay controls playsinline style="width:100%;" src="media/video.mp4">
                         Ваш браузер не поддерживает видео.
                     </video>
                 `;
 
                 const giftVideo = document.getElementById('giftVideo');
 
-                if (giftVideo && bgVideo) {
-                    // Звук фона отключаем, как только открыли/запустили подарочное видео
-                    bgVideo.muted = true; 
+                if (giftVideo) {
+                    // Если видео в папке media/ выдаст ошибку, пробуем воспроизвести из корня папки
+                    giftVideo.onerror = function() {
+                        const currentSrc = giftVideo.getAttribute('src');
+                        if (currentSrc && currentSrc.includes('media/')) {
+                            console.log("Подарочное видео не найдено в media/. Пробуем корень...");
+                            giftVideo.src = 'video.mp4';
+                            giftVideo.load();
+                            giftVideo.play().catch(err => console.log(err));
+                        }
+                    };
 
-                    giftVideo.addEventListener('play', () => {
-                        bgVideo.muted = true; 
-                    });
+                    if (bgVideo) {
+                        // СРАЗУ глушим фоновое видео при открытии подарочного медиаплеера
+                        bgVideo.muted = true;
 
-                    // Когда подарочное видео закончится — возвращаем звук фона
-                    giftVideo.addEventListener('ended', () => {
-                        bgVideo.muted = false; 
-                    });
+                        // Дополнительно вешаем обработчики на запуск и паузу
+                        giftVideo.addEventListener('play', () => {
+                            bgVideo.muted = true;
+                        });
+
+                        giftVideo.addEventListener('pause', () => {
+                            bgVideo.muted = false;
+                        });
+
+                        // Когда подарочное видео доиграет до конца - возвращаем звук фона
+                        giftVideo.addEventListener('ended', () => {
+                            bgVideo.muted = false;
+                        });
+                    }
                 }
             }
             
@@ -324,12 +363,14 @@
             const mediaModal = document.getElementById('mediaModal');
             const mediaContent = document.getElementById('mediaContent');
             
+            // Очищаем плеер подарка (это остановит воспроизведение)
             mediaContent.innerHTML = ''; 
             mediaModal.classList.add('hidden');
 
-            // Возвращаем звук фона при закрытии модалки медиа
+            // Всегда возвращаем фоновый звук при закрытии окна
             if (bgVideo) {
-                bgVideo.muted = false; 
+                bgVideo.muted = false;
+                bgVideo.play().catch(err => console.log(err));
             }
         }
     </script>

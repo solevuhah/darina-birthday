@@ -1,8 +1,18 @@
-// ОДНО фото
 const photo = 'media/photo.jpg';
-
-// ОДНО видео
 const video = 'media/video.mp4';
+
+function toggleSound() {
+    const video = document.getElementById('bgVideo');
+    const btn = document.getElementById('soundBtn');
+    
+    if (video.muted) {
+        video.muted = false;
+        btn.textContent = '🔇 Выключить звук';
+    } else {
+        video.muted = true;
+        btn.textContent = '🔊 Включить звук';
+    }
+}
 
 function openGift() {
     document.getElementById('giftModal').classList.remove('hidden');
@@ -44,7 +54,6 @@ function closeMedia() {
     content.innerHTML = '';
 }
 
-// Escape
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         closeGift();
@@ -52,7 +61,6 @@ document.addEventListener('keydown', e => {
     }
 });
 
-// Клик на фон
 document.getElementById('giftModal').addEventListener('click', function(e) {
     if (e.target === this) closeGift();
 });

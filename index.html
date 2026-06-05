@@ -27,15 +27,14 @@
         /* Задний фон: видео на весь экран */
         .bg-video {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: -2;
-            transform: translate(-50%, -50%);
             object-fit: cover;
+            opacity: 1;
+            background-color: #000; /* Резервный фон */
         }
 
         /* Затемнение поверх видео для читаемости текста */
@@ -212,8 +211,9 @@
 </head>
 <body>
 
-    <!-- Фоновое видео (изначально muted для обхода блокировок браузера) -->
-    <video id="bgVideo" class="bg-video" autoplay loop playsinline muted>
+    <!-- Фоновое видео (путь прописан напрямую в src для гарантированного обхода блокировок) -->
+    <video id="bgVideo" class="bg-video" autoplay loop playsinline muted preload="auto" src="media/background.mp4">
+        <!-- Резервный вариант для старых браузеров -->
         <source src="media/background.mp4" type="video/mp4">
     </video>
     
@@ -245,70 +245,92 @@
     <script>
         const bgVideo = document.getElementById('bgVideo');
 
-        // Функция автоматического включения звука при ЛЮБОМ клике/взаимодействии с сайтом
-        function enableSound() {
+        // Принудительно заставляем браузер подгрузить и запустить видео при загрузке страницы
+        function initBackgroundVideo() {
             if (bgVideo) {
-                bgVideo.muted = false; // Снимаем беззвучный режим
+                bgVideo.muted = true; // Сначала беззвучно (требование безопасности браузера)
+                bgVideo.load();       // Принудительно перезагружаем источник
                 bgVideo.play().catch(err => {
-                    console.log("Автовоспроизведение ожидает клика:", err);
+                    console.log("Автоплей ожидает первого клика пользователя:", err);
                 });
             }
-            // Удаляем слушатели, так как звук мы уже включили
+        }
+
+        // Запуск инициализации при первой возможности
+        document.addEventListener('DOMContentLoaded', initBackgroundVideo);
+        window.addEventListener('load', initBackgroundVideo);
+
+        // Функция включения звука фонового видео при взаимодействии
+        function enableSound() {
+            if (bgVideo) {
+                bgVideo.muted = false; // Включаем звук
+                bgVideo.play().catch(err => console.log("Не удалось запустить видео со звуком:", err));
+            }
+            // Снимаем глобальные прослушиватели событий, чтобы не срабатывали повторно
             document.removeEventListener('click', enableSound);
             document.removeEventListener('touchstart', enableSound);
         }
 
-        // Добавляем отслеживание первого касания/клика по сайту для включения звука
+        // Слушаем первый клик или касание экрана для активации звука
         document.addEventListener('click', enableSound);
         document.addEventListener('touchstart', enableSound);
 
-        // Открытие первой модалки подарка
         function openGift() {
-            enableSound(); // Включаем звук принудительно при клике на эту кнопку
-            
-            const giftModal = document.getElementById('giftModal');
-            giftModal.classList.remove('hidden');
+            enableSound(); // Принудительно включаем звук фонового видео на клик
+            document.getElementById('giftModal').classList.remove('hidden');
         }
         
-        // Закрытие модалки подарка
         function closeGift() {
             document.getElementById('giftModal').classList.add('hidden');
         }
         
-        // Открытие медиа (Фото / Видео)
         function openMedia(type) {
             const mediaModal = document.getElementById('mediaModal');
             const mediaContent = document.getElementById('mediaContent');
-            
-            // Очищаем предыдущий контент
             mediaContent.innerHTML = '';
             
             if (type === 'photo') {
-                // Путь исправлен на media/photo.jpg согласно твоим файлам
                 mediaContent.innerHTML = `<img src="media/photo.jpg" alt="Подарок Дарине" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1549417229-aa67d3263c09?w=800';">`;
             } else if (type === 'video') {
-                // Путь исправлен на media/video.mp4 согласно твоим файлам
                 mediaContent.innerHTML = `
-                    <video autoplay controls playsinline style="width:100%;">
+                    <video id="giftVideo" autoplay controls playsinline style="width:100%;">
                         <source src="media/video.mp4" type="video/mp4">
                         Ваш браузер не поддерживает видео.
                     </video>
                 `;
+
+                const giftVideo = document.getElementById('giftVideo');
+
+                if (giftVideo && bgVideo) {
+                    // Звук фона отключаем, как только открыли/запустили подарочное видео
+                    bgVideo.muted = true; 
+
+                    giftVideo.addEventListener('play', () => {
+                        bgVideo.muted = true; 
+                    });
+
+                    // Когда подарочное видео закончится — возвращаем звук фона
+                    giftVideo.addEventListener('ended', () => {
+                        bgVideo.muted = false; 
+                    });
+                }
             }
             
-            // Скрываем первую модалку и показываем медиа модалку
             closeGift();
             mediaModal.classList.remove('hidden');
         }
         
-        // Закрытие медиа модалки
         function closeMedia() {
             const mediaModal = document.getElementById('mediaModal');
             const mediaContent = document.getElementById('mediaContent');
             
-            // Останавливаем видео внутри модалки перед закрытием
             mediaContent.innerHTML = ''; 
             mediaModal.classList.add('hidden');
+
+            // Возвращаем звук фона при закрытии модалки медиа
+            if (bgVideo) {
+                bgVideo.muted = false; 
+            }
         }
     </script>
 </body>

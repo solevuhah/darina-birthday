@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>С Днём Рождения! 🎉</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>С Днём Рождения, [Имя подруги]! 🎂</h1>
+        <p class="subtitle">Нажми на кнопку, чтобы увидеть сюрприз!</p>
+        
+        <div class="buttons">
+            <button onclick="showSurprise('photo')">📸 Фото</button>
+            <button onclick="showSurprise('gif')">🎬 Гифка</button>
+            <button onclick="showSurprise('video')">🎥 Видео</button>
+            <button onclick="showSurprise('random')">🎁 Случайный сюрприз</button>
+        </div>
+        
+        <div id="surprise-container" class="surprise-container hidden">
+            <span class="close-btn" onclick="closeSurprise()">✕</span>
+            <div id="surprise-content"></div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
